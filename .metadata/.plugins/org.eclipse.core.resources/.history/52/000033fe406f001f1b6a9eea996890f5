@@ -1,0 +1,120 @@
+package vn.iotstar.dao.impl;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import vn.iotstar.configs.BDConnectMySQL;
+import vn.iotstar.dao.IUserdao;
+import vn.iotstar.models.UserModel;
+
+public class Userdaoimpl extends BDConnectMySQL implements IUserdao {
+
+	public Connection conn = null;
+	public PreparedStatement ps = null;
+	public ResultSet rs = null;
+
+	@Override
+	public List<UserModel> findAll() {
+		String sql = "select * from users";
+		List<UserModel> list = new ArrayList<>();
+		try {
+			conn = super.getDatabaseConnection();
+			ps = conn.prepareStatement(sql);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				list.add(new UserModel(rs.getInt("id"), rs.getString("username"), rs.getString("email"),
+						rs.getString("fullname"), rs.getString("images"), rs.getString("password")));
+			}
+			return list;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+
+	}
+
+	@Override
+	public UserModel findById(int id) {
+		String sql = "SELECT * FROM users WHERE id = ?";
+		UserModel user = null;
+		try {
+			conn = super.getDatabaseConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, id); // Thiết lập giá trị cho tham số id trong câu lệnh SQL
+			rs = ps.executeQuery();
+
+			// Kiểm tra kết quả truy vấn
+			if (rs.next()) {
+				user = new UserModel(rs.getInt("id"), rs.getString("username"), rs.getString("email"),
+						rs.getString("fullname"), rs.getString("images"), rs.getString("password"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return user; // Trả về đối tượng UserModel hoặc null nếu không tìm thấy
+	}
+
+	@Override
+	public void insert(UserModel user) {
+		
+		String sql = "INSERT INTO users(id, username, email, fullname, images, password) VALUES (?, ?, ?, ?, ?, ?)";
+		
+		try {
+			conn = super.getDatabaseConnection();
+			ps = conn.prepareStatement(sql);
+			
+			ps.setInt(1,user.getId());
+			ps.setString(2,user.getUsername());
+			ps.setString(3,user.getEmail());
+			ps.setString(4,user.getPassword());
+			ps.setString(5,user.getFullname());
+			ps.setString(6,user.getImages());
+			
+			ps.executeUpdate();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+
+	public static void main(String[] args) {
+
+		/*
+		 * Userdaoimpl userdao = new Userdaoimpl(); List<UserModel> list =
+		 * userdao.findAll(); for (UserModel user : list) {
+		 * 
+		 * System.out.println(user); }
+		 */
+
+/*		Userdaoimpl userDao = new Userdaoimpl();
+
+		userDao.insert(new UserModel(3, "Trung", "trung@gmail.com", "minh trung", "null","1234"));
+
+		List<UserModel> list = userDao.findAll();
+
+		for (UserModel user : list) {
+			System.out.println(user);*/
+		
+        Userdaoimpl userdao = new Userdaoimpl();
+
+        // Ghi trực tiếp giá trị ID vào code
+        int id = 3; // Ví dụ: ID = 1
+        UserModel user = userdao.findById(id);
+        
+        if (user != null) {
+            System.out.println("User found: " + user);
+        } else {
+            System.out.println("User not found with ID: " + id);
+        }
+		
+
+	}
+
+}
